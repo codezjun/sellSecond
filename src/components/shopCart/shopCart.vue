@@ -74,7 +74,7 @@ export default {
 				let diff=this.minPrice-this.totalPrice;
 				return  `还差￥${diff}元起送`;
 			}else{
-				return '去结算';
+				return '去结算' ;
 			}
 		}
 	},
