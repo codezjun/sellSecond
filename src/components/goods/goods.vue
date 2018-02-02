@@ -15,7 +15,7 @@
 				<li v-for="item in goods" class="food-list food-list-hook">
 					<h1 class="title">{{item.name}}</h1>
 					<ul>
-						<li v-for="food in item.foods" class="food-item border-1px">
+						<li v-for="food in item.foods" class="food-item border-1px" @click="selectFoodFun(food)">
 							<div class="icon">
 								<img :src="food.icon" alt="" width="57" height="57"/>
 							</div>
@@ -28,18 +28,17 @@
 								<div class="price">
 									<span class="now">￥{{food.price}}</span><span class="old" v-show="food.oldPrice !== ''">￥{{food.oldPrice}}</span>									
 								</div>
-							</div>
-							<div class="cartcontrol-wrapper">
-								<cartcontrol :food="food"></cartcontrol>
-							</div>
+								<div class="cartcontrol-wrapper">
+									<cartcontrol :food="food"></cartcontrol>
+								</div>
+							</div>						
 						</li>
 					</ul>
 				</li>
 			</ul>
 		</div>
-		<shopcart :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>
-		
-
+		<shopcart :selectFoods="selectFoods" :delivery-price="seller.deliveryPrice" :min-price="seller.minPrice"></shopcart>
+		<food :food="selectFood" ref="food"></food>
   </div>
 </template>
 
@@ -48,6 +47,7 @@ import axios from 'axios'
 import BScroll from 'better-scroll'
 import shopcart from 'components/shopCart/shopCart'
 import cartcontrol from 'components/cartcontrol/cartcontrol'
+import food from 'components/food/food'
 
 const ERR_OK = 200
 export default {
@@ -58,10 +58,11 @@ export default {
   },
   data(){
   	return {
-  		goods:{},
+  		goods:[],
   		//存右侧每个li到外层ul的顶部的高度的区间。
   		listHeight:[],
-  		scrollY:0
+		scrollY:0,
+		selectFood:{}//点击食物列表的时候点击的food
   	}
   },
   computed:{
@@ -75,7 +76,19 @@ export default {
   			}
   		}
   		return 0;
-  	}
+	},
+	selectFoods(){
+		let foods=[];
+			this.goods.forEach((good)=>{
+				good.foods.forEach((food)=>{
+					//有count说明被选择，即把当前food放入foods
+					if(food.count){
+						foods.push(food);
+					}
+				})
+			})
+			return foods;
+	}
   },
   created(){
   	this.classMap=['decrease','discount','special','invoice','guarantee'];
@@ -87,9 +100,9 @@ export default {
       	console.log(response.data.goods);
       	
       	this.$nextTick(()=>{
-				  this._initScroll();
-				  this._calculateHeight();
-				});
+			this._initScroll();
+			this._calculateHeight();
+		});
       	
       }
     })
@@ -101,13 +114,13 @@ export default {
 	methods:{
 		_initScroll(){
 			this.meunScroll = new BScroll(this.$refs.menuWrapper,{
-		    scrollY: true,
-		    click: true//设置了true才可以点击
+				scrollY: true,
+				click: true//设置了true才可以点击
 			})
 			this.foodsScroll = new BScroll(this.$refs.foodsWrapper,{
-		    scrollY: true,
-		    click: true,//设置了true才可以点击
-		    probeType:3//此设置可以让scroll滚动的时候，实时监听到滚动的位置。
+				scrollY: true,
+				click: true,//设置了true才可以点击
+				probeType:3//此设置可以让scroll滚动的时候，实时监听到滚动的位置。
 			})
 			//监听foods-wrapper的滚动事件
 			this.foodsScroll.on('scroll',(pos)=>{
@@ -129,8 +142,8 @@ export default {
 			//console.log(this.listHeight)
 		},
 		selectMenu(index,event){			
-			//pc上原生点击也能监听到，防止pc出现了两次点击（貌似）
-			//浏览器原生事件没有属性constructed
+			//pc上原生点击也能监听到，防止pc出现了两次点击（最新可以不加判断了）
+			//浏览器原生事件没有属性constructed,如果不是better-scroll派生的事件，就return掉。
 			if(!event._constructed){
 				return;
 			}
@@ -139,10 +152,16 @@ export default {
 			let el=foodList[index];//左侧menu点击，右侧要滚动到的dom
 			//scrollToElement是better-scroll插件的接口，跳到对应的dom，动画时间设置为300ms
 			this.foodsScroll.scrollToElement(el,300);
+		},
+		selectFoodFun(food){
+			this.selectFood=food;
+			//调用子组件food组件中的show方法
+			this.$refs.food.show();
+			//console.log(JSON.stringify(food));
 		}
 	},
 	components:{
-		shopcart,cartcontrol
+		shopcart,cartcontrol,food
 	}
 }
 </script>
@@ -224,6 +243,7 @@ export default {
 					flex:0 0 57px
 					margin-right:10px
 				.content
+					position:relative
 					flex:1
 					.name
 						margin:2px 0 8px 0
@@ -252,6 +272,9 @@ export default {
 							text-decoration:line-through
 							font-size:10px
 							color:rgb(147,153,159)
-							
+					.cartcontrol-wrapper
+						position:absolute
+						right:-10px
+						bottom:-6px
 						
 </style>
