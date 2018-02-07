@@ -16,7 +16,7 @@
 
 <script>
 import Vue from "vue";
-import bus from '../../assets/eventBus'
+import bus from '../../assets/eventBus';
 export default {
 	props: {
 		food:{

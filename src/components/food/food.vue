@@ -57,7 +57,7 @@
      </transition>
 </template>
 
-<script>
+<script type="text/ecmascript-6">
 import axios from 'axios';
 import BScroll from 'better-scroll';
 import Vue from 'vue';

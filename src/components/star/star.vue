@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/ecmascript-6">
 const LENGTH = 5;
 const CLS_ON ="on";
 const CLS_HALF ="half";
@@ -70,7 +70,7 @@ export default {
 			.star-item
 				width:15px
 				height:15px
-				margin-right:16px
+				margin-right:6px
 				background-size:100% 100%
 				&:last-child
 					margin-right:0
